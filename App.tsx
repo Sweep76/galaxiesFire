@@ -8,7 +8,6 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 
 const Stack = createNativeStackNavigator();
-
 const InsideStack = createNativeStackNavigator();
 
 function InsideLayout() {
@@ -24,21 +23,23 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    onAuthStateChanged(FIREBASE_AUTH, (user) => {
+    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, (user) => {
       console.log('user', user);
       setUser(user);
     });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
   }, []);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Login'>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-         <Stack.Screen name='Inside' component={InsideLayout} options={{headerShown: false}} />
-        ): (
-          <Stack.Screen name='Login' component={InsideLayout} options={{headerShown: false}} />
+          <Stack.Screen name="Inside" component={InsideLayout} />
+        ) : (
+          <Stack.Screen name="Login" component={Login} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
